@@ -25,6 +25,15 @@ function renderFolderTree() {
 
             const nameSpan = document.createElement('span');
             nameSpan.textContent = item.name;
+
+            // ノート名クリックで選択
+            nameSpan.onclick = (e) => {
+                e.stopPropagation();
+                if (item.type === 'note') {
+                    selectNote(item);  // ノートを選択
+                }
+            };
+
             nameDiv.appendChild(nameSpan);
 
             // アクションボタンを格納するための div
@@ -56,25 +65,16 @@ function renderFolderTree() {
                     createNewNote(item.id); // フォルダー内でノートを追加
                 };
                 actionsDiv.appendChild(createNoteBtn);
-            }
 
-            // フォルダー名をクリックしたときにアクションボタンを表示
-            nameDiv.onclick = (e) => {
-                e.stopPropagation(); // クリックイベントが親に伝わらないようにする
-                actionsDiv.style.display = actionsDiv.style.display === 'none' ? 'block' : 'none'; // アクションボタンの表示/非表示を切り替え
-            };
+                // フォルダー名クリックでアクションボタン表示
+                nameDiv.onclick = (e) => {
+                    e.stopPropagation();
+                    actionsDiv.style.display = actionsDiv.style.display === 'none' ? 'block' : 'none';
+                };
+            }
 
             nameDiv.appendChild(actionsDiv);  // アクションボタンを名前と一緒に表示
             div.appendChild(nameDiv);
-
-            div.onclick = (e) => {
-                e.stopPropagation();
-                if (item.type === 'note') {
-                    selectNote(item);
-                } else {
-                    div.classList.toggle('open');
-                }
-            };
 
             if (item.type === 'folder' && item.children) {
                 const childContainer = document.createElement('div');
@@ -90,11 +90,14 @@ function renderFolderTree() {
     renderItems(notes, folderTree);
 }
 
+
 function selectNote(note) {
     selectedNote = note;
     document.getElementById('noteTitle').value = note.name;
     document.getElementById('noteContent').value = note.content || '';
     document.querySelectorAll('.note').forEach(el => el.classList.remove('selected'));
+    
+    // ノート選択時のクラス付与
     const selectedNoteDiv = document.querySelector(`.note span:contains('${note.name}')`);
     if (selectedNoteDiv) {
         selectedNoteDiv.parentElement.classList.add('selected');
@@ -105,7 +108,7 @@ function saveNote() {
     if (selectedNote) {
         selectedNote.name = document.getElementById('noteTitle').value;
         selectedNote.content = document.getElementById('noteContent').value;
-        renderFolderTree();
+        renderFolderTree();  // ノートを保存したらフォルダーを再描画
     }
 }
 
@@ -129,7 +132,7 @@ function deleteNote() {
             selectedNote = null;
             document.getElementById('noteTitle').value = '';
             document.getElementById('noteContent').value = '';
-            renderFolderTree();
+            renderFolderTree();  // フォルダーを再描画
         }
     }
 }
@@ -143,7 +146,7 @@ function createNewFolder() {
             name: folderName,
             children: []
         });
-        renderFolderTree();
+        renderFolderTree();  // フォルダーを再描画
     }
 }
 
@@ -199,7 +202,7 @@ function renameFolder(folderId) {
     };
 
     if (renameInArray(notes)) {
-        renderFolderTree();
+        renderFolderTree();  // フォルダー名変更後、再描画
     }
 }
 
@@ -224,7 +227,7 @@ function deleteFolder(folderId) {
         selectedNote = null;
         document.getElementById('noteTitle').value = '';
         document.getElementById('noteContent').value = '';
-        renderFolderTree();
+        renderFolderTree();  // フォルダーを再描画
     }
 }
 
